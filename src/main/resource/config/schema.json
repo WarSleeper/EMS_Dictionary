@@ -1,0 +1,13 @@
+{
+    "ems": "zz_ems",
+    "udm": "zz_udm",
+    "emsvdata": "zz_emsvdata",
+    "objectdata": "zz_objectdata",
+    "meterdata": "zz_meterdata",
+    "originaldata": "zz_originaldata",
+    "servicedata": "zz_servicedata",
+    "energydata": "zz_energydata",
+    "tenementdata": "zz_tenementdata",
+    "tenant": "zz_tenant",
+    "workflow": "zz_workflow"
+}

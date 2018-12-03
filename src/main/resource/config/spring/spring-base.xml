@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans     
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd    
+	http://www.springframework.org/schema/context    
+	http://www.springframework.org/schema/context/spring-context-3.2.xsd    
+	http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+    http://www.springframework.org/schema/cache
+    http://www.springframework.org/schema/cache/spring-cache.xsd
+    ">
+
+	<!-- spring3 @value 特性加载属性文件内容 -->
+	<context:property-placeholder location="classpath:config/system.properties" />
+	<!-- 使用spring注解-->
+	<context:annotation-config />
+	<!-- spring扫描目录 -->
+	<context:component-scan base-package="com.persagy">
+		<!-- 不包括@Controller -->
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<!-- 数据库驱动 -->
+		<property name="driverClass" value="${jdbc.driverClass}" />
+		<!-- 数据库连接串 -->
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}" />
+		<!-- 用户名 -->
+		<property name="user" value="${jdbc.user}" />
+		<!-- 密码 -->
+		<property name="password" value="${jdbc.password}" />
+		<!-- 连接池维持连接数最小值 -->
+		<property name="minPoolSize" value="${jdbc.miniPoolSize}" />
+		<!-- 连接池维持链接数最大值 -->
+		<property name="maxPoolSize" value="${jdbc.maxPoolSize}" />
+		<!-- 连接池初始化链接数 -->
+		<property name="initialPoolSize" value="${jdbc.initialPoolSize}" />
+		<!-- 最大空闲时间,设置秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+		<property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
+		<!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+		<property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
+		<!-- 定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 -->
+		<property name="acquireRetryAttempts" value="${jdbc.acquireRetryAttempts}" />
+		<!-- 两次连接中间隔时间，单位毫秒。Default: 1000 -->
+		<property name="acquireRetryDelay" value="${jdbc.acquireRetryDelay}" />
+		<!-- 如果设为true那么在取得连接的同时将校验连接的有效性。Default: false -->
+		<property name="testConnectionOnCheckin" value="${jdbc.testConnectionOnCheckin}" />
+		<!-- c3p0将建一张名为设置表名的空表，并使用其自带的查询语句进行测试。Default: null -->
+		<property name="automaticTestTable" value="${jdbc.automaticTestTable}" />
+		<!--每设置秒检查所有连接池中的空闲连接。Default: 0 -->
+		<property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
+		<!--当连接池用完时客户端调用getConnection()后等待获取新连接的时间，超时后将抛出SQLException,如设为0则无限期等待。单位毫秒。Default: 0 -->
+		<property name="checkoutTimeout" value="${jdbc.checkoutTimeout}" />
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+    	<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!--  缓存  属性-->  
+    <bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation"  value="classpath:config/ehcache/ehcache.xml"/>
+    </bean>
+      
+    <!-- 默认是cacheManager -->  
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager"  ref="cacheManagerFactory"/>    
+    </bean>
+    
+     <!-- 支持缓存注解 -->  
+    <cache:annotation-driven cache-manager="cacheManager"/>
+
+</beans>	
